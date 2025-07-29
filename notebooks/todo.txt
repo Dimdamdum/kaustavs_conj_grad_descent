@@ -1,0 +1,6 @@
+todo
+- all TODO 
+- test whether you can get minimal working dir by writing silly functions + understand imports and tests
+- write clear introduction to jup notebook
+
+done
