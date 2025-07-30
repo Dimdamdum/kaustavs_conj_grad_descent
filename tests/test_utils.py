@@ -10,7 +10,7 @@ import os
 # Add the src directory to the path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from kaustav_conj.utils import h
+from kaustav_conj.utils import h, H
 
 
 class TestUtils:
@@ -24,6 +24,14 @@ class TestUtils:
         assert h(0.0) == 0.0
         assert h(1 - 1e-16) == 0.0
         assert np.isnan(h(-0.1))
+    
+    def test_H_function(self):
+        """Test function H(v) is sum of h values."""
+        # Test with mixed values
+        v_mixed = [0.1, 0.5, 0.9]
+        expected = h(0.1) + h(0.5) + h(0.9)
+        assert np.isclose(H(v_mixed), expected, rtol=1e-10)
+
 
 #    def test_check_convergence(self):
 #        """Test convergence checking."""

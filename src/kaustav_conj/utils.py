@@ -20,6 +20,15 @@ def h(x):
         return 0.  # Avoid log(0) by returning 0 at boundaries
     else:
         return -x * np.log(x) - (1 - x) * np.log(1 - x)
+    
+def H(v):
+    """
+    "Binary" Shannon entropy function: H(v) = sum of h(v_i) for each element v_i in vector v.
+    """
+    total = 0.0
+    for vi in v:
+        total += h(vi)
+    return total 
 
 
 # def check_convergence(residual_norm: float, tol: float, iteration: int, max_iter: int) -> bool:
