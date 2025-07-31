@@ -5,7 +5,7 @@ This module contains helper functions for matrix operations, convergence checkin
 """
 
 import numpy as np
-# from ... import ...
+from numpy import linalg as LA
 
 def h(x):
     """
@@ -28,7 +28,49 @@ def H(v):
     total = 0.0
     for vi in v:
         total += h(vi)
-    return total 
+    return total
+
+def nK(n, lamb):
+    """
+    Returns best block spectrum relative to n, according to Kaustav's conjecture, with each block spectrum already ordered
+    """
+    d = len(n)
+    if (lamb < d/2 or lamb >= d):
+        print(f"Warning: nK called with lambda={lamb}, which is outside [len(n)/2,len(n) - 1]")
+        return np.nan  # Return NaN for invalid inputs
+    n_sorted = np.sort(n)[::-1]
+    nK_2 = []
+    for i in range(d - lamb):
+        nK_2.append((n_sorted[i] + n_sorted[-i-1])/2)
+    nK_2.sort(reverse=True)
+    nK_1 = sorted(nK_2 + list(n_sorted[d - lamb:lamb]), reverse=True)
+    return np.array(nK_1 + nK_2)
+
+def block_spec(M, lamb):
+    """
+    Returns block spectrum of  eigenvalues of M. lamb is the partition parameter. 
+    
+    Parameters:
+    -----------
+    M : np.ndarray (complex)
+        Square matrix of size d
+    lamb : int
+        Partition parameter, in [d/2, d - 1 ]
+        
+    Returns:
+    --------
+    b : np.array (complex)
+        Block spectrum.
+        [b[0], ..., b[lamb - 1]] is the (unordered) spectrum of upper-left lamb x lambd block of M
+        [b[lamb], ..., b[d - 1]] is the (unordered) spectrum of lower-right block of M
+    """
+    d = M.shape[0]
+    if (lamb < d/2 or lamb >= d):
+        print(f"Warning: nK called with lambda={lamb}, which is outside [len(n)/2,len(n) - 1]")
+        return np.nan  # Return NaN for invalid inputs
+    B_1 = M[0:lamb,0:lamb]
+    B_2 = M[lamb:d,lamb:d]
+    return np.concatenate((LA.eigvals(B_1), LA.eigvals(B_2))) 
 
 
 # def check_convergence(residual_norm: float, tol: float, iteration: int, max_iter: int) -> bool:
