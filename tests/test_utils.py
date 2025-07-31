@@ -9,11 +9,12 @@ import sys
 import os
 import scipy
 from scipy.linalg import block_diag
+import torch
 
 # Add the src directory to the path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from kaustav_conj.utils import h, H, nK, block_spec
+from kaustav_conj.utils import h, H, nK, block_spec, M_to_A
 
 
 class TestUtils:
@@ -37,39 +38,43 @@ class TestUtils:
 
     def test_nK_function(self):
         """Test basic properties of function nK(n)."""
-        n = np.array([1., 6., 2., 4., 3.3])
+        n = torch.tensor([1., 6., 2., 4., 3.3], dtype=torch.double)
         lamb = 3
-        nK_correct = np.array([3.5, 3.3, 3., 3.5, 3.])
-        print(nK(n, lamb))
-        assert np.allclose(nK(n, lamb), nK_correct, rtol=1e-10)
+        nK_correct = torch.tensor([3.5, 3.3, 3., 3.5, 3.], dtype=torch.double)
+        assert torch.allclose(nK(n, lamb), nK_correct, rtol=1e-10)
         assert np.isnan(nK(n, 2))
 
     def test_block_spec_function(self):
-        """Test we're actually getting spectrum of diagonal blocks."""
-        Y = np.array([[0, -1.j], [1.j, 0]])
-        D1 = np.diag([[3.14 + 1.j]])
-        D2 = np.diag((4. + 0.j,5. + 0.j))
-        M = block_diag(Y, D1, D2)
+        """Test we're actually getting spectrum of diagonal blocks (torch version)."""
+        Y = torch.tensor([[0, -1j], [1j, 0]], dtype=torch.cdouble)
+        D1 = torch.diag(torch.tensor([3.14 + 1j], dtype=torch.cdouble))
+        D2 = torch.diag(torch.tensor([4. + 0j, 5. + 0j], dtype=torch.cdouble))
+        M = torch.block_diag(Y, D1, D2)
         lamb = 3
-        spec_1 = [-1. + 0.j, 1. + 0.j, 3.14 + 1.j]
-        spec_2 = [4. + 0.j, 5. + 0.j]
+        spec_1 = torch.tensor([-1. + 0j, 1. + 0j, 3.14 + 1j], dtype=torch.cdouble)
+        spec_2 = torch.tensor([4. + 0j, 5. + 0j], dtype=torch.cdouble)
         b = block_spec(M, lamb)
-        b_1 = list(b[0:lamb])
-        b_2 = list(b[lamb:5])
-        # Check spec_1 and b_1 are same lists up to permutation
-        assert np.allclose(
-            np.sort(np.array(spec_1)), 
-            np.sort(np.array(b_1)), 
-            rtol=1e-10
-        )
-        # Check spec_2 and b_2 are same lists up to permutation
-        assert np.allclose(
-            np.sort(np.array(spec_2)), 
-            np.sort(np.array(b_2)), 
-            rtol=1e-10
-        )
+        b_1 = b[0:lamb]
+        b_2 = b[lamb:5]
+        # Convert tensors to numpy arrays for comparison and sorting (bc of complex entries)
+        spec_1_sorted = np.sort(np.array(spec_1))
+        b_1_sorted = np.sort(np.array(b_1))
+        spec_2_sorted = np.sort(np.array(spec_2))
+        b_2_sorted = np.sort(np.array(b_2))
+        # Check spec_1 and b_1 are same arrays up to permutation
+        assert np.allclose(spec_1_sorted, b_1_sorted, rtol=1e-10)
+        # Check spec_2 and b_2 are same arrays up to permutation
+        assert np.allclose(spec_2_sorted, b_2_sorted, rtol=1e-10)
 
-
+    def test_M_to_A_function(self):
+        """Test basics of M_to_A."""
+        M = torch.tensor([[1., 2.], [3., 4.]], dtype=torch.double)
+        A = M_to_A(M)
+        A_correct = torch.tensor([[1.j, 2. + 3.j], [-2. + 3.j,  4.j]], dtype=torch.cdouble)
+        assert torch.allclose(A, A_correct, rtol=1e-10)
+        M = torch.tensor([[1., 0.], [-1., 1.]], dtype=torch.double)
+        A = M_to_A(M)
+        A_correct = torch.tensor([[1.j, -1.j], [-1.j,  1.j]], dtype=torch.cdouble)
 
 
 #    def test_check_convergence(self):

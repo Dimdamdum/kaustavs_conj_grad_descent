@@ -1,11 +1,12 @@
 """
 Utility functions
 
-This module contains helper functions for matrix operations, convergence checking,... TODO
+This module contains helper functions for matrix operations, basic entropic functions, eigenvalue computations.
 """
 
 import numpy as np
 from numpy import linalg as LA
+import torch
 
 def h(x):
     """
@@ -37,14 +38,14 @@ def nK(n, lamb):
     d = len(n)
     if (lamb < d/2 or lamb >= d):
         print(f"Warning: nK called with lambda={lamb}, which is outside [len(n)/2,len(n) - 1]")
-        return np.nan  # Return NaN for invalid inputs
-    n_sorted = np.sort(n)[::-1]
+        return torch.nan  # Return NaN for invalid inputs
+    n_sorted = torch.sort(n, descending=True).values
     nK_2 = []
     for i in range(d - lamb):
         nK_2.append((n_sorted[i] + n_sorted[-i-1])/2)
-    nK_2.sort(reverse=True)
+    nK_2 = sorted(nK_2, reverse=True)
     nK_1 = sorted(nK_2 + list(n_sorted[d - lamb:lamb]), reverse=True)
-    return np.array(nK_1 + nK_2)
+    return torch.tensor(nK_1 + nK_2, dtype=n.dtype)
 
 def block_spec(M, lamb):
     """
@@ -52,14 +53,14 @@ def block_spec(M, lamb):
     
     Parameters:
     -----------
-    M : np.ndarray (complex)
+    M : torch.Tensor (complex)
         Square matrix of size d
     lamb : int
         Partition parameter, in [d/2, d - 1 ]
         
     Returns:
     --------
-    b : np.array (complex)
+    b : torch.Tensor (complex)
         Block spectrum.
         [b[0], ..., b[lamb - 1]] is the (unordered) spectrum of upper-left lamb x lambd block of M
         [b[lamb], ..., b[d - 1]] is the (unordered) spectrum of lower-right block of M
@@ -70,7 +71,24 @@ def block_spec(M, lamb):
         return np.nan  # Return NaN for invalid inputs
     B_1 = M[0:lamb,0:lamb]
     B_2 = M[lamb:d,lamb:d]
-    return np.concatenate((LA.eigvals(B_1), LA.eigvals(B_2))) 
+    return torch.cat((torch.linalg.eigvals(B_1), torch.linalg.eigvals(B_2)))
+
+# function to pass from M to the corresponding hermitian matrix H
+def M_to_A(M):
+    """
+    Returns a d x d antihermitian matrix A starting from a d x d real matrix M
+    """
+    d = M.shape[0]
+    A = torch.zeros((d, d), dtype=torch.cdouble) # this tensor will have complex entries
+    for i in range(d):
+        for k in range(d):
+            if i == k:
+                A[i][k] = M[i][k] * 1.j
+            if i < k:
+                A[i][k] = M[i][k] + 1.j * M[k][i]
+            if i > k:
+                A[i][k] = - M[k][i] + 1.j * M[i][k]
+    return A
 
 
 # def check_convergence(residual_norm: float, tol: float, iteration: int, max_iter: int) -> bool:
