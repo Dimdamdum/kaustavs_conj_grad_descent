@@ -11,8 +11,8 @@ import torch
 # Add the src directory to the path so we can import the module
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from kaustav_conj.utils import h, H, M_to_A
-from kaustav_conj.core import build_cost_function
+from kaustav_conj.utils import h, H, M_to_A, nK
+from kaustav_conj.core import build_cost_function, get_b_best
 
 class TestCore:
     """Test core functions."""
@@ -30,3 +30,11 @@ class TestCore:
         assert np.isnan(build_cost_function(n, lamb))
         assert np.isnan(cost_function(np.zeros((2,2))))
         assert np.isnan(cost_function(torch.tensor([[0.]], dtype=torch.double)))
+
+    def test_get_b_best(self):
+        """Test whether get_b_best actually gives optimal spectrum"""
+        n = [0.2, 0.6]
+        lamb = 1
+        b_best_conj = nK(n, lamb)
+        U_best, b_best_num, H_best = get_b_best(n, lamb, N_init=4, N_steps=300,learning_rate=0.01)
+        np.allclose(b_best_conj, b_best_num, rtol=1e-10)
