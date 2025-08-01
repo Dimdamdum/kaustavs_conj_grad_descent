@@ -36,5 +36,7 @@ class TestCore:
         n = [0.2, 0.6]
         lamb = 1
         b_best_conj = nK(n, lamb)
-        U_best, b_best_num, H_best = get_b_best(n, lamb, N_init=4, N_steps=300,learning_rate=0.01)
-        np.allclose(b_best_conj, b_best_num, rtol=1e-10)
+        eps = 1e-14
+        U_best, b_best_num, H_best, conjecture_holds = get_b_best(n, lamb, N_init=4, N_steps=300,learning_rate=0.01, eps = eps)
+        assert np.allclose(b_best_conj, b_best_num, rtol=1e-5)
+        assert conjecture_holds

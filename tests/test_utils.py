@@ -14,7 +14,7 @@ import torch
 # Add the src directory to the path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from kaustav_conj.utils import h, H, nK, block_spec, M_to_A
+from kaustav_conj.utils import h, H, nK, block_spec, M_to_A, majorizes
 
 
 class TestUtils:
@@ -80,13 +80,12 @@ class TestUtils:
         A = M_to_A(M)
         A_correct = torch.tensor([[1.j, -1.j], [-1.j,  1.j]], dtype=torch.cdouble)
 
-
-#    def test_check_convergence(self):
-#        """Test convergence checking."""
-#        assert check_convergence(1e-7, 1e-6, 10, 100) == True  # Tolerance met
-#        assert check_convergence(1e-5, 1e-6, 10, 100) == False  # Tolerance not met
-#        assert check_convergence(1e-7, 1e-6, 101, 100) == True  # Max iterations reached
-    
-#    def test_compute_residual(self):
-#        """Test residual computation."""
-#        # TODO
+    def test_majorizes(self):
+        """Test majorizes, i.e. the majorization check function"""
+        x = [0., 3., 0., 0.]
+        y = [1., 1.2, 0.8, 1.e-16]
+        z = [1., 1., 1., 1.]
+        w = [1.5, 1.5]
+        assert majorizes(x, y) == True
+        assert majorizes(x, z) == False
+        assert majorizes(x, w) == False

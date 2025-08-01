@@ -6,7 +6,7 @@ This module contains the main implementations for .... TODO
 
 import numpy as np
 import torch
-from kaustav_conj.utils import H, M_to_A, block_spec, nK
+from kaustav_conj.utils import H, M_to_A, block_spec, nK, majorizes
 
 def build_cost_function(n, lamb):
     """
@@ -49,7 +49,7 @@ def build_cost_function(n, lamb):
         return -H(torch.real(b))
     return cost_function
 
-def get_b_best(n, lamb, rand_range=1., N_init=1, N_steps=1000, learning_rate=0.01):
+def get_b_best(n, lamb, rand_range=1., N_init=1, N_steps=1000, learning_rate=0.01, eps=1e-12):
     """
     Returns
     
@@ -67,6 +67,9 @@ def get_b_best(n, lamb, rand_range=1., N_init=1, N_steps=1000, learning_rate=0.0
         Number of gradient descent steps per initialization (default: 1000).
     learning_rate: float, optional
         Learning rate for gradient descent (default: 0.01).
+    eps = float, optional
+        precision to which majorization condition gets checked (default: 1e-12).
+        Also used to check H does not go above conjectured value.
         
     Returns:
     --------
@@ -76,6 +79,8 @@ def get_b_best(n, lamb, rand_range=1., N_init=1, N_steps=1000, learning_rate=0.0
         The block spectrum maximizing the entropic function H. Obtained by conjugating diagonal(n) with U_best_best.
     H_best_best : float
         H(b_best_best)
+    conjecture_holds : bool
+        True if no violation to conjecture are found, False otherwise
     """
     d = len(n)
 
@@ -86,9 +91,12 @@ def get_b_best(n, lamb, rand_range=1., N_init=1, N_steps=1000, learning_rate=0.0
     U_best = torch.empty(d, d, dtype=torch.cdouble)
     b_best = np.empty(d)
     H_best = 0.0
+    conjecture_holds = True
     D = torch.diag(torch.tensor(n, dtype=torch.cdouble))
     b_best_conj = nK(n, lamb)
     H_best_conj = H(b_best_conj)
+    delta_H = 0.
+    majorization_conj = True
 
     # initialize storage lists
     U_best_list = []
@@ -102,7 +110,8 @@ def get_b_best(n, lamb, rand_range=1., N_init=1, N_steps=1000, learning_rate=0.0
     print(f"  rand_range = {rand_range}")
     print(f"  N_init = {N_init}")
     print(f"  N_steps = {N_steps}")
-    print(f"  learning_rate = {learning_rate}\n")
+    print(f"  learning_rate = {learning_rate}")
+    print(f"  eps = {eps}\n")
 
     # start cycle for different initializations
     for i in range(N_init):
@@ -129,13 +138,25 @@ def get_b_best(n, lamb, rand_range=1., N_init=1, N_steps=1000, learning_rate=0.0
             torch.sort(b_best_unsorted[lamb:], descending=True).values
         ]).detach().numpy()
         H_best = H(b_best)
+        delta_H = H_best_conj - H_best
+        majorization_conj = majorizes(b_best, b_best_conj, eps=eps)
 
         # print results
         print(f"\n{'='*20}\nResults of gradient descent run {i+1}/{N_init}\n{'='*20}")
         print(f"Numerical b_best: \n {b_best}")
         print(f"Conjectured b_best: \n {b_best_conj}")
         print(f"Norm of difference: \n {np.linalg.norm(b_best - b_best_conj)}")
-        print(f"Conjectured H_best - numerical H_best (should be > 0): \n {H_best_conj - H_best}")
+        print(f"Conjectured H_best - numerical H_best (should be > 0): \n {delta_H}")
+        print(f"Conjectured majorization: \n {majorization_conj}")
+
+        # check whether anything unexpected occurred
+        if delta_H < - eps:
+            print(f"CONJECTURE VIOLATED!!! delta_H = {delta_H} < -eps = -{eps}!!!")
+            conjecture_holds = False
+        if majorization_conj == False:
+            print(f"CONJECTURE POSSIBLY VIOLATED!!! b_best DOES NOT MAJORIZE b_best_conj TO GIVEN PRECISION eps = {eps}!!!")
+            print(f"This could be just about numerical errors. Search for messages starting with '(Function majorizes): ...' in above output.")
+            conjecture_holds = False
 
         # store results
         U_best_list.append(U_best)
@@ -155,6 +176,11 @@ def get_b_best(n, lamb, rand_range=1., N_init=1, N_steps=1000, learning_rate=0.0
     print(f"Conjectured b_best: \n {b_best_conj}")
     print(f"Norm of difference: \n {np.linalg.norm(b_best_best - b_best_conj)}")
     print(f"Conjectured H_best - numerical H_best (should be > 0): \n {H_best_conj - H_best_best}")
+    print(f"Conjectured majorization: \n {majorizes(b_best_best, b_best_conj, eps=eps)}")
+    if conjecture_holds == False:
+        print("CONJECTURE POSSIBLY VIOLATED!!! Check out output details.")
+    else:
+        print("No violations to the conjecture were found.")
 
-    return U_best_best, b_best_best, H_best_best
+    return U_best_best, b_best_best, H_best_best, conjecture_holds
     

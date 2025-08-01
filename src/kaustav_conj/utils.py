@@ -93,21 +93,27 @@ def M_to_A(M):
                 A[i][k] = - M[k][i] + 1.j * M[i][k]
     return A
 
-
-# def check_convergence(residual_norm: float, tol: float, iteration: int, max_iter: int) -> bool:
+def majorizes(x, y, eps=1e-14):
     """
-    Check if the algorithm has converged.
-    
-    Parameters:
-    -----------
-    residual_norm : float
-        ......
-        
-    Returns:
-    --------
-    bool
-        True if converged, False otherwise
+    Returns True if sum(x) = sum(y) up to precision eps (default: 1e-14) and
+    sum_{i=0}^k x_decreasingly_ordered_k[i] >= sum_{i=0}^k y_decreasingly_ordered_k[i] up to precision eps for k = 0, ..., d - 1
+    with d = len(x) = len(y), False otherwise
     """
-#    return residual_norm < tol or iteration >= max_iter
-
+    x = np.array(x)
+    y = np.array(y)
+    if len(x) != len(y):
+        print(f"Possible error: majorizes called with vectors of different lengths (len(x)={len(x)}, len(y)={len(y)})")
+        return False
+    d = len(x)
+    x_sorted = np.sort(x)[::-1]
+    y_sorted = np.sort(y)[::-1]
+    abs_sum_diff = abs(np.sum(x_sorted) - np.sum(y_sorted))
+    if abs_sum_diff > eps:
+        print(f"(Function majorizes:) sum of all entries of x and y differ by {abs_sum_diff}")
+        return False
+    for k in range(d):
+        if np.sum(x_sorted[:k+1]) < np.sum(y_sorted[:k+1]) - eps:
+            print(f"(Function majorizes:) ({k}-th partial sum of y) - ({k}-th partial sum of x ) = {np.sum(y_sorted[:k+1]) - np.sum(x_sorted[:k+1])}")
+            return False
+    return True
     
