@@ -22,7 +22,10 @@ class TestUtils:
     
     def test_h_function(self):
         """Test basic properties of function h(x)."""
-        assert np.isclose(h(0.5), np.log(2), rtol=1e-10)  # h(0.5) = log(2)
+        x = 0.5
+        assert np.isclose(h(x), np.log(2), rtol=1e-10)  # h(0.5) = log(2)
+        x_torch = torch.tensor(x, dtype=torch.double)
+        assert torch.isclose(h(x_torch), torch.tensor(np.log(2), dtype=torch.double), rtol=1e-10)
         x = 0.123511
         assert np.isclose(h(x), h(1-x), rtol=1e-10) # h(x) = h(1 - x)
         assert h(0.0) == 0.0
@@ -31,17 +34,18 @@ class TestUtils:
     
     def test_H_function(self):
         """Test function H(v) is sum of h values."""
-        # Test with mixed values
-        v_mixed = [0.1, 0.5, 0.9]
+        v = [0.1, 0.5, 0.9]
+        v_torch = torch.tensor(v, dtype=torch.double)
         expected = h(0.1) + h(0.5) + h(0.9)
-        assert np.isclose(H(v_mixed), expected, rtol=1e-10)
+        assert np.isclose(H(v), expected, rtol=1e-10)
+        assert torch.isclose(H(v_torch), torch.tensor(expected, dtype=torch.double), rtol=1e-10)
 
     def test_nK_function(self):
         """Test basic properties of function nK(n)."""
-        n = torch.tensor([1., 6., 2., 4., 3.3], dtype=torch.double)
+        n = [1., 6., 2., 4., 3.3]
         lamb = 3
-        nK_correct = torch.tensor([3.5, 3.3, 3., 3.5, 3.], dtype=torch.double)
-        assert torch.allclose(nK(n, lamb), nK_correct, rtol=1e-10)
+        nK_correct = [3.5, 3.3, 3., 3.5, 3.]
+        assert np.allclose(nK(n, lamb), nK_correct, rtol=1e-10)
         assert np.isnan(nK(n, 2))
 
     def test_block_spec_function(self):

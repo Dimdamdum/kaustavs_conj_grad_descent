@@ -19,8 +19,10 @@ def h(x):
         return np.nan  # Return NaN for invalid inputs
     elif (x < eps or x > 1 - eps):
         return 0.  # Avoid log(0) by returning 0 at boundaries
+    elif isinstance(x, torch.Tensor):
+        return -x * torch.log(x) - (1 - x) * torch.log(1 - x) # needed when using torch gradients
     else:
-        return -x * np.log(x) - (1 - x) * np.log(1 - x)
+        return -x * np.log(x) - (1 - x) * np.log(1 - x) # needed because torch.log does not work on floats
     
 def H(v):
     """
@@ -33,19 +35,20 @@ def H(v):
 
 def nK(n, lamb):
     """
-    Returns best block spectrum relative to n, according to Kaustav's conjecture, with each block spectrum already ordered
+    Returns best block spectrum relative to n, according to Kaustav's conjecture, with each block spectrum already ordered.
+    Accepts n as a list of floats (or numpy array), returns numpy array.
     """
     d = len(n)
     if (lamb < d/2 or lamb >= d):
         print(f"Warning: nK called with lambda={lamb}, which is outside [len(n)/2,len(n) - 1]")
-        return torch.nan  # Return NaN for invalid inputs
-    n_sorted = torch.sort(n, descending=True).values
+        return float('nan')  # Return NaN for invalid inputs
+    n_sorted = sorted(n, reverse=True)
     nK_2 = []
     for i in range(d - lamb):
-        nK_2.append((n_sorted[i] + n_sorted[-i-1])/2)
+        nK_2.append((n_sorted[i] + n_sorted[-i-1]) / 2)
     nK_2 = sorted(nK_2, reverse=True)
-    nK_1 = sorted(nK_2 + list(n_sorted[d - lamb:lamb]), reverse=True)
-    return torch.tensor(nK_1 + nK_2, dtype=n.dtype)
+    nK_1 = sorted(nK_2 + n_sorted[d - lamb:lamb], reverse=True)
+    return np.array(nK_1 + nK_2)
 
 def block_spec(M, lamb):
     """
