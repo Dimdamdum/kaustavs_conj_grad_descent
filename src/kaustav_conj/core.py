@@ -49,7 +49,7 @@ def build_cost_function(n, lamb):
         return -H(torch.real(b))
     return cost_function
 
-def get_b_best(n, lamb, rand_range=1., N_init=1, N_steps=1000, learning_rate=0.01, eps=1e-12):
+def get_b_best(n, lamb, rand_range=1., N_init=1, N_steps=1000, learning_rate=0.01, eps=1e-12, print_more=False):
     """
     Returns
     
@@ -70,6 +70,8 @@ def get_b_best(n, lamb, rand_range=1., N_init=1, N_steps=1000, learning_rate=0.0
     eps = float, optional
         precision to which majorization condition gets checked (default: 1e-12).
         Also used to check H does not go above conjectured value.
+    print_more = bool
+        Print output for each of the N_init initializations.
         
     Returns:
     --------
@@ -103,7 +105,7 @@ def get_b_best(n, lamb, rand_range=1., N_init=1, N_steps=1000, learning_rate=0.0
     b_best_list = []
     H_best_list = []
 
-    print(f"\n{'='*40}\nStarting get_b_best optimization\n{'='*40}")
+    print(f"\n{'='*40}\nStarting get_b_best optimization for n = {n}\n{'='*40}")
     print(f"Parameters recap:")
     print(f"  n = {n}")
     print(f"  lambda = {lamb}")
@@ -111,11 +113,14 @@ def get_b_best(n, lamb, rand_range=1., N_init=1, N_steps=1000, learning_rate=0.0
     print(f"  N_init = {N_init}")
     print(f"  N_steps = {N_steps}")
     print(f"  learning_rate = {learning_rate}")
-    print(f"  eps = {eps}\n")
+    print(f"  eps = {eps}")
+    print(f"  print_more = {print_more}\n")
 
     # start cycle for different initializations
     for i in range(N_init):
-        print(f"\n{'='*20}\nStarting gradient descent run {i+1}/{N_init}\n{'='*20}")
+        if print_more == True:
+            print(f"\n{'-'*20}")
+        print(f"Starting gradient descent run {i+1}/{N_init}")
         # initialize variable to be optimized, with entries in [-rand_range/2, rand_range/2]
         M = rand_range * (torch.rand(d, d) - 0.5 * torch.ones(d,d))
         M.requires_grad_(True)
@@ -127,8 +132,8 @@ def get_b_best(n, lamb, rand_range=1., N_init=1, N_steps=1000, learning_rate=0.0
             loss = cost_function(M)
             loss.backward() # compute gradient
             optimizer.step() # update M
-            if step % 100 == 0:
-                print(f"Gradient descent, step # {step}")
+            #if step % 100 == 0:
+                #print(f"Gradient descent, step # {step}")
 
         # store best unitary, block spec, and H value
         U_best = torch.matrix_exp(M_to_A(M))
@@ -142,14 +147,15 @@ def get_b_best(n, lamb, rand_range=1., N_init=1, N_steps=1000, learning_rate=0.0
         majorization_conj = majorizes(b_best, b_best_conj, eps=eps)
 
         # print results
-        print(f"\n{'='*20}\nResults of gradient descent run {i+1}/{N_init}\n{'='*20}")
-        print(f"Numerical b_best: \n {b_best}")
-        print(f"Conjectured b_best: \n {b_best_conj}")
-        print(f"Norm of difference: \n {np.linalg.norm(b_best - b_best_conj)}")
-        print(f"Conjectured H_best - numerical H_best (should be > 0): \n {delta_H}")
-        print(f"Conjectured majorization: \n {majorization_conj}")
+        if print_more == True:
+            print(f"Finished gradient descent run {i+1}/{N_init}, printing results.\n{'-'*20}")
+            print(f"Numerical b_best: \n {b_best}")
+            print(f"Conjectured b_best: \n {b_best_conj}")
+            print(f"Norm of difference: \n {np.linalg.norm(b_best - b_best_conj)}")
+            print(f"Conjectured H_best - numerical H_best (should be > 0): \n {delta_H}")
+            print(f"Conjectured majorization: \n {majorization_conj}")
 
-        # check whether anything unexpected occurred
+        # check whether anything unexpected occurred. To be printed whichever the value of print_more!
         if delta_H < - eps:
             print(f"CONJECTURE VIOLATED!!! delta_H = {delta_H} < -eps = -{eps}!!!")
             conjecture_holds = False
@@ -163,7 +169,6 @@ def get_b_best(n, lamb, rand_range=1., N_init=1, N_steps=1000, learning_rate=0.0
         b_best_list.append(b_best)
         H_best_list.append(H_best)
 
-    print(f"\n{'='*40}\nget_b_best optimization finished\n{'='*40}")
     # Find the index of the highest H_best value
     best_idx = np.argmax(H_best_list)
     U_best_best = U_best_list[best_idx]
@@ -171,16 +176,18 @@ def get_b_best(n, lamb, rand_range=1., N_init=1, N_steps=1000, learning_rate=0.0
     H_best_best = H_best_list[best_idx]
 
     # print final results
-    print(f"\n{'='*20}\n Final results, optimized over various initializations\n{'='*20}")
-    print(f"Numerical b_best: \n {b_best_best}")
-    print(f"Conjectured b_best: \n {b_best_conj}")
-    print(f"Norm of difference: \n {np.linalg.norm(b_best_best - b_best_conj)}")
-    print(f"Conjectured H_best - numerical H_best (should be > 0): \n {H_best_conj - H_best_best}")
-    print(f"Conjectured majorization: \n {majorizes(b_best_best, b_best_conj, eps=eps)}")
+    print(f"\n{'='*40}\nPrinting final results, optimized over all N_init = {N_init} initializations\n{'='*40}")
+    print(f"Numerical b_best = {b_best_best}")
+    print(f"Conjectured b_best = {b_best_conj}")
+    print(f"Norm of difference = {np.linalg.norm(b_best_best - b_best_conj)}")
+    print(f"Conjectured H_best - numerical H_best (should be > 0) = {H_best_conj - H_best_best}")
+    print(f"Conjectured majorization = {majorizes(b_best_best, b_best_conj, eps=eps)}")
     if conjecture_holds == False:
         print("CONJECTURE POSSIBLY VIOLATED!!! Check out output details.")
     else:
         print("No violations to the conjecture were found.")
+
+    print(f"\n{'='*40}\nFinished get_b_best optimization for n = {n}\n{'='*40}\n")
 
     return U_best_best, b_best_best, H_best_best, conjecture_holds
     
