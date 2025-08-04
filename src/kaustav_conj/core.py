@@ -1,7 +1,7 @@
 """
 Core functions
 
-This module contains the main implementations for .... TODO
+This module contains the main implementations for the construction of the target function we aim to optimize, and for the corresponding gradient descent.
 """
 
 import numpy as np

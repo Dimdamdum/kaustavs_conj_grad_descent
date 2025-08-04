@@ -1,16 +1,7 @@
 todo
-- search for TODOs left in code
-- write a clear jupyter notebook
-- send to cluster various batches of jobs. Try doing one job per d, should be OK. Here is a rough idea:
-    1st batch: 1 job, d = 2
-    2nd batch: 5 jobs, d = 1 -> 5, just for more testing
-    3rd batch: 10 jobs, d = 6 -> 15, with low N_n number of n vectors per pair (d, lamb) (e.g., N_n = 10),
-    and low N_init number of initalizations per pair (d, lamb) (e.g., N_init = 4)
-- then study output, possibly reiterate, and understand how to tweak parameters depending on d (and lamb)
-so as to guarantee convergence. Play around a bit with N_steps, learning_rate and rand_range, too
-- now can go for main batch of jobs, based on output you got before. Increase N_n and,
-if it seems possibly relevant, increase N_n (i dont think this helps!). Still just d = 6 -> 15
-- final "exotic" batch, with high values of d and lambda, not too expensive
-- add cell in jupyter notebook explaining what you tested, to remember + for github
+- send many jobs to cluster and understand output (say, 5-7 batches in total)
+- (?) Play around a bit with N_steps, learning_rate and rand_range, too
+- one final "exotic" batch, with high values of d (one n at a time, with N_init = 1 so it does not take too long, many parallel jobs)
+- write jupyter notebook, including cell explaining what you tested, based on recap.txt (in LMU computers)
 
 done
