@@ -8,7 +8,7 @@ import time
 # Add the src directory to the path so we can import the module
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from kaustav_conj.utils import h, H, nK, block_spec, M_to_A
+from kaustav_conj.utils import h, H, bK, block_spec, M_to_A
 from kaustav_conj.core import build_cost_function, get_b_best
 
 #Store all parameters specified via command line:
@@ -45,7 +45,7 @@ for lamb in range(int(np.ceil(d/2)), d):
     print(F"\n{'='*40}\n{'='*40}\nCASE d = {d}, lambda = {lamb}\n{'='*40}\n{'='*40}\n")
     for _ in range(N_n):
         n = np.random.rand(d)
-        b_best_conj = nK(n, lamb)
+        b_best_conj = bK(n, lamb)
         U_best, b_best_num, H_best, conjecture_holds = get_b_best(n, lamb, N_init=N_init, N_steps=N_steps,learning_rate=learning_rate, eps=eps, print_more=print_more)
         if conjecture_holds == False:
             break

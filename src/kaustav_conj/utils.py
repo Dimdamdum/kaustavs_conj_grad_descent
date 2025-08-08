@@ -33,22 +33,22 @@ def H(v):
         total += h(vi)
     return total
 
-def nK(n, lamb):
+def bK(n, lamb):
     """
     Returns best block spectrum relative to n, according to Kaustav's conjecture, with each block spectrum already ordered.
     Accepts n as a list of floats (or numpy array), returns numpy array.
     """
     d = len(n)
     if (lamb < d/2 or lamb >= d):
-        print(f"Warning: nK called with lambda={lamb}, which is outside [len(n)/2,len(n) - 1]")
+        print(f"Warning: bK called with lambda={lamb}, which is outside [len(n)/2,len(n) - 1]")
         return float('nan')  # Return NaN for invalid inputs
     n_sorted = sorted(n, reverse=True)
-    nK_2 = []
+    bK_2 = []
     for i in range(d - lamb):
-        nK_2.append((n_sorted[i] + n_sorted[-i-1]) / 2)
-    nK_2 = sorted(nK_2, reverse=True)
-    nK_1 = sorted(nK_2 + n_sorted[d - lamb:lamb], reverse=True)
-    return np.array(nK_1 + nK_2)
+        bK_2.append((n_sorted[i] + n_sorted[-i-1]) / 2)
+    bK_2 = sorted(bK_2, reverse=True)
+    bK_1 = sorted(bK_2 + n_sorted[d - lamb:lamb], reverse=True)
+    return np.array(bK_1 + bK_2)
 
 def block_spec(M, lamb):
     """
@@ -70,7 +70,7 @@ def block_spec(M, lamb):
     """
     d = M.shape[0]
     if (lamb < d/2 or lamb >= d):
-        print(f"Warning: nK called with lambda={lamb}, which is outside [len(n)/2,len(n) - 1]")
+        print(f"Warning: bK called with lambda={lamb}, which is outside [len(n)/2,len(n) - 1]")
         return np.nan  # Return NaN for invalid inputs
     B_1 = M[0:lamb,0:lamb]
     B_2 = M[lamb:d,lamb:d]

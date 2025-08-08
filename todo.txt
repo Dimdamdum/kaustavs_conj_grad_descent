@@ -1,7 +1,0 @@
-todo
-- send many jobs to cluster and understand output (say, 5-7 batches in total)
-- (?) Play around a bit with N_steps, learning_rate and rand_range, too
-- one final "exotic" batch, with high values of d (one n at a time, with N_init = 1 so it does not take too long, many parallel jobs)
-- write jupyter notebook, including cell explaining what you tested, based on recap.txt (in LMU computers)
-
-done

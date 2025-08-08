@@ -6,7 +6,7 @@ This module contains the main implementations for the construction of the target
 
 import numpy as np
 import torch
-from kaustav_conj.utils import H, M_to_A, block_spec, nK, majorizes
+from kaustav_conj.utils import H, M_to_A, block_spec, bK, majorizes
 
 def build_cost_function(n, lamb):
     """
@@ -95,7 +95,7 @@ def get_b_best(n, lamb, rand_range=1., N_init=1, N_steps=1000, learning_rate=0.0
     H_best = 0.0
     conjecture_holds = True
     D = torch.diag(torch.tensor(n, dtype=torch.cdouble))
-    b_best_conj = nK(n, lamb)
+    b_best_conj = bK(n, lamb)
     H_best_conj = H(b_best_conj)
     delta_H = 0.
     majorization_conj = True
