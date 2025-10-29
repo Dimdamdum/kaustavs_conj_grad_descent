@@ -14,7 +14,7 @@ import torch
 # Add the src directory to the path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from kaustav_conj.utils import h, H, bK, block_spec, M_to_A, majorizes
+from kaustav_conj.utils import h, H, bK, block_spec, M_to_A, majorizes, multi_block_spec
 
 
 class TestUtils:
@@ -89,3 +89,35 @@ class TestUtils:
         assert majorizes(x, y) == True
         assert majorizes(x, z) == False
         assert majorizes(x, w) == False
+
+    def test_multi_block_spec_function(self):
+        """Test we're actually getting spectrum of diagonal blocks."""
+        # two blocks, comparison with block_spec function
+        d = 5
+        lamb = 3
+        partition = (3,2)
+        M = torch.tensor([
+    [0.56+0.00j, 0.12+0.34j, 0.77+0.08j, 0.05+0.99j, 0.40+0.21j],
+    [0.12-0.34j, 0.03+0.00j, 0.66+0.44j, 0.11+0.03j, 0.95+0.27j],
+    [0.77-0.08j, 0.66-0.44j, 0.89+0.00j, 0.22+0.78j, 0.33+0.66j],
+    [0.05-0.99j, 0.11-0.03j, 0.22-0.78j, 0.47+0.00j, 0.81+0.05j],
+    [0.40-0.21j, 0.95-0.27j, 0.33-0.66j, 0.81-0.05j, 0.10+0.00j]
+], dtype=torch.cdouble) # a hermitian matrix
+        b_old = np.array(block_spec(M, lamb))
+        b_new = np.array(multi_block_spec(M, partition))
+        # Check equality
+        assert np.allclose(b_old, b_new, rtol=1e-10)
+
+        # three blocks
+        partition = [2,2,1]
+        M1 = M[0:2,0:2]
+        M2 = M[2:4,2:4]
+        b_new = np.array(multi_block_spec(M, partition))
+        spec_M1 = torch.linalg.eigvals(M1).numpy()
+        spec_M2 = torch.linalg.eigvals(M2).numpy()
+        spec_M3 = np.array([M[4, 4].item()])
+        b_correct = np.concatenate([spec_M1, spec_M2, spec_M3])
+        assert np.allclose(np.sort(b_new), np.sort(b_correct), rtol=1e-10)
+
+
+

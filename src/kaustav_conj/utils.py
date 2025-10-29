@@ -70,7 +70,7 @@ def block_spec(M, lamb):
     """
     d = M.shape[0]
     if (lamb < d/2 or lamb >= d):
-        print(f"Warning: bK called with lambda={lamb}, which is outside [len(n)/2,len(n) - 1]")
+        print(f"Warning: block_spec called with lambda={lamb}, which is outside [d/2,d - 1]")
         return np.nan  # Return NaN for invalid inputs
     B_1 = M[0:lamb,0:lamb]
     B_2 = M[lamb:d,lamb:d]
@@ -117,3 +117,33 @@ def majorizes(x, y, eps=1e-14):
             return False
     return True
     
+def multi_block_spec(M, partition):
+    """
+    Returns block spectrum of  eigenvalues of M. lamb is the partition parameter. 
+    
+    Parameters:
+    -----------
+    M : torch.Tensor (complex)
+        Square matrix of size d
+    partition : list (integer)
+        Integer partition of d
+        
+    Returns:
+    --------
+    b : torch.Tensor (complex)
+        Block spectrum.
+        [b[0], ..., b[partition[0] - 1]] is the (unordered) spectrum of upper-left partition[0] x partition[0] block of M
+        [b[partition[0]], ..., b[partition[0] + partition[1] - 1]] is the (unordered) spectrum of second block, and so on
+    """
+    d = M.shape[0]
+    partition_length = len(partition)
+    if not (d == sum(partition)) and all(partition[i] >= partition[i+1] for i in range(partition_length - 1)):
+        print(f"Warning: multi_block_spec called with partition={partition}, which is not a valid decreasingly ordered partition of d={d}")
+        return np.nan  # Return NaN for invalid inputs
+    blocks = []
+    lower_cut = 0
+    for i in range(partition_length):
+        upper_cut = lower_cut + partition[i]
+        blocks.append(M[lower_cut:upper_cut, lower_cut:upper_cut])
+        lower_cut = upper_cut
+    return torch.cat([torch.linalg.eigvals(B) for B in blocks])
