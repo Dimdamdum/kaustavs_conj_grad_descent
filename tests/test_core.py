@@ -11,7 +11,7 @@ import torch
 # Add the src directory to the path so we can import the module
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from kaustav_conj.utils import h, H, M_to_A, nK
+from kaustav_conj.utils import h, H, M_to_A, bK
 from kaustav_conj.core import build_cost_function, get_b_best
 
 class TestCore:
@@ -35,7 +35,7 @@ class TestCore:
         """Test whether get_b_best actually gives optimal spectrum"""
         n = [0.2, 0.6]
         lamb = 1
-        b_best_conj = nK(n, lamb)
+        b_best_conj = bK(n, lamb)
         eps = 1e-14
         U_best, b_best_num, H_best, conjecture_holds = get_b_best(n, lamb, N_init=4, N_steps=300,learning_rate=0.01, eps = eps)
         assert np.allclose(b_best_conj, b_best_num, rtol=1e-5)

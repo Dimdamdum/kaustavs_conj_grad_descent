@@ -14,7 +14,7 @@ import torch
 # Add the src directory to the path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from kaustav_conj.utils import h, H, nK, block_spec, M_to_A, majorizes
+from kaustav_conj.utils import h, H, bK, block_spec, M_to_A, majorizes
 
 
 class TestUtils:
@@ -40,13 +40,13 @@ class TestUtils:
         assert np.isclose(H(v), expected, rtol=1e-10)
         assert torch.isclose(H(v_torch), torch.tensor(expected, dtype=torch.double), rtol=1e-10)
 
-    def test_nK_function(self):
-        """Test basic properties of function nK(n)."""
+    def test_bK_function(self):
+        """Test basic properties of function bK(n)."""
         n = [1., 6., 2., 4., 3.3]
         lamb = 3
-        nK_correct = [3.5, 3.3, 3., 3.5, 3.]
-        assert np.allclose(nK(n, lamb), nK_correct, rtol=1e-10)
-        assert np.isnan(nK(n, 2))
+        bK_correct = [3.5, 3.3, 3., 3.5, 3.]
+        assert np.allclose(bK(n, lamb), bK_correct, rtol=1e-10)
+        assert np.isnan(bK(n, 2))
 
     def test_block_spec_function(self):
         """Test we're actually getting spectrum of diagonal blocks (torch version)."""
