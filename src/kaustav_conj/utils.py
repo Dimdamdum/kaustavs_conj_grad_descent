@@ -7,6 +7,8 @@ This module contains helper functions for matrix operations, basic entropic func
 import numpy as np
 from numpy import linalg as LA
 import torch
+from sympy.utilities.iterables import partitions
+
 
 def h(x):
     """
@@ -117,7 +119,7 @@ def majorizes(x, y, eps=1e-14):
             return False
     return True
     
-def multi_block_spec(M, partition):
+def multi_block_spec(M, partition, order=False):
     """
     Returns block spectrum of  eigenvalues of M. lamb is the partition parameter. 
     
@@ -127,13 +129,15 @@ def multi_block_spec(M, partition):
         Square matrix of size d
     partition : list (integer)
         Integer partition of d
+    order : boolean
+        If True, block spectra will be ordered decreasingly (for each block).
         
     Returns:
     --------
     b : torch.Tensor (complex)
         Block spectrum.
-        [b[0], ..., b[partition[0] - 1]] is the (unordered) spectrum of upper-left partition[0] x partition[0] block of M
-        [b[partition[0]], ..., b[partition[0] + partition[1] - 1]] is the (unordered) spectrum of second block, and so on
+        [b[0], ..., b[partition[0] - 1]] is the (un)ordered spectrum of upper-left partition[0] x partition[0] block of M
+        [b[partition[0]], ..., b[partition[0] + partition[1] - 1]] is the (un)ordered spectrum of second block, and so on
     """
     d = M.shape[0]
     partition_length = len(partition)
@@ -146,4 +150,26 @@ def multi_block_spec(M, partition):
         upper_cut = lower_cut + partition[i]
         blocks.append(M[lower_cut:upper_cut, lower_cut:upper_cut])
         lower_cut = upper_cut
-    return torch.cat([torch.linalg.eigvals(B) for B in blocks])
+    if order:
+        b = torch.cat([torch.sort(torch.real(torch.linalg.eigvals(B)), descending=True).values for B in blocks])
+    else:
+        b = torch.cat([torch.linalg.eigvals(B) for B in blocks])
+    return b
+
+def list_all_partitions(d):
+    """
+    Returns a list of sublists. The sublists are the partitions of the integer d.
+    """
+
+    # Generate all partitions
+    all_partitions = list(partitions(d))
+
+    # Convert to list format
+    list_partitions = []
+    for p in all_partitions:
+        partition = []
+        for k, v in p.items():
+            partition.extend([k] * v)
+        list_partitions.append(partition)
+
+    return list_partitions[1:] # remove trivial partition

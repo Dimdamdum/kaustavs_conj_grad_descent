@@ -14,7 +14,7 @@ import torch
 # Add the src directory to the path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from kaustav_conj.utils import h, H, bK, block_spec, M_to_A, majorizes, multi_block_spec
+from kaustav_conj.utils import h, H, bK, block_spec, M_to_A, majorizes, multi_block_spec, list_all_partitions
 
 
 class TestUtils:
@@ -113,11 +113,21 @@ class TestUtils:
         M1 = M[0:2,0:2]
         M2 = M[2:4,2:4]
         b_new = np.array(multi_block_spec(M, partition))
-        spec_M1 = torch.linalg.eigvals(M1).numpy()
-        spec_M2 = torch.linalg.eigvals(M2).numpy()
+        spec_M1 = torch.linalg.eigvals(M1).numpy() # happens to be already ordered
+        spec_M2 = torch.linalg.eigvals(M2).numpy() # happens to be already ordered
         spec_M3 = np.array([M[4, 4].item()])
         b_correct = np.concatenate([spec_M1, spec_M2, spec_M3])
         assert np.allclose(np.sort(b_new), np.sort(b_correct), rtol=1e-10)
+
+        # with ordering of eigenvalues within each block   
+        b_new = np.array(multi_block_spec(M, partition, order=True))
+        assert np.allclose(np.sort(b_new), np.sort(b_correct), rtol=1e-10)
+
+    def test_list_all_partitions(self):
+        """Test list_all_partitions function."""
+        d = 4
+        assert list_all_partitions(d) == [[3,1], [2,2], [2,1,1], [1,1,1,1]]
+        
 
 
 
