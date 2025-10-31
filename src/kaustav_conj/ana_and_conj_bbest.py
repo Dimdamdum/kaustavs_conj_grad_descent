@@ -4,16 +4,16 @@ This module contains two functions: b_best_ana returning analytical values of bb
 """
 import numpy as np
 
-def b_best_ana(n, partition):
+def b_best_ana(n, int_partition):
     """"
-    Returns the analytically obtained b_best relative to the d-dimensional vector n and the given partition.
+    Returns the analytically obtained b_best relative to the d-dimensional vector n and the given integer partition.
 
-    Partitions supported so far:
+    Integer partitions supported so far:
     d=4 [3,1], [2,2], [2,1,1], [1,1,1,1]
     d=5 [3,1,1]
     """
     # quick validation
-    if len(n) != sum(partition):
+    if len(n) != sum(int_partition):
         raise ValueError("Input vector n must have length 4.")
     if not all(n[i] >= n[i+1] for i in range(3)):
         raise ValueError("Input vector n must be decreasingly ordered: n0 >= n1 >= n2 >= n3.")
@@ -22,18 +22,18 @@ def b_best_ana(n, partition):
     ##  d = 4 ##
     ############
 
-    #### partition (3,1) ####
-    if partition == [3,1]:
+    #### int_partition (3,1) ####
+    if int_partition == [3,1]:
         appo = np.array(sorted([(n[0] + n[3]) / 2, n[1], n[2]], reverse=True))
         b_best = np.concatenate((appo, np.array([(n[0] + n[3]) / 2])))
 
-    #### partition (2,2) ####
-    elif partition == [2,2]:
+    #### int_partition (2,2) ####
+    elif int_partition == [2,2]:
         appo = np.array(sorted([(n[0] + n[3]) / 2, (n[1] + n[2]) / 2], reverse=True))
         b_best = np.concatenate((appo, appo))
 
-    #### partition (2,1,1) ####
-    elif partition == [2,1,1]:
+    #### int_partition (2,1,1) ####
+    elif int_partition == [2,1,1]:
         eta = sum(n)/4
         if eta >= n[1]: # 1st regime
             appo = (n[0]+n[2]+n[3])/3
@@ -44,8 +44,8 @@ def b_best_ana(n, partition):
             appo = (n[0]+n[1]+n[3])/3
             b_best = np.array([n[2], appo, appo, appo])
 
-    #### partition (1,1,1,1) ####
-    elif partition == [1,1,1,1]:
+    #### int_partition (1,1,1,1) ####
+    elif int_partition == [1,1,1,1]:
         eta = sum(n)/4
         b_best = np.array([eta,eta,eta,eta])
 
@@ -53,28 +53,28 @@ def b_best_ana(n, partition):
     ##  d = 5 ##
     ############
 
-    #### partition (3,1,1) ####
-    elif partition == [3,1,1]:
+    #### int_partition (3,1,1) ####
+    elif int_partition == [3,1,1]:
         n_reduced = np.array([n[0], n[1], n[3], n[4]])
         b_best_red = b_best_ana(n_reduced, [2,1,1])
         appo = np.array(sorted([b_best_red[0], b_best_red[1], n[2]], reverse=True))
         b_best = np.concatenate([appo, np.array([b_best_red[2]]), np.array([b_best_red[3]])])
 
     else:
-        raise ValueError("Sorry, for the partition you chose the function has not been implemented yet!")
+        raise ValueError("Sorry, for the integer partition you chose the function has not been implemented yet!")
 
     return b_best
 
 
-def b_best_CONJ(n, partition):
+def b_best_conj(n, int_partition):
     """"
-    Returns the analytically obtained b_best relative to the d-dimensional vector n and the given partition.
+    Returns the analytically obtained b_best relative to the d-dimensional vector n and the given integer partition.
 
     Partitions supported so far:
 
     """
     # quick validation
-    if len(n) != sum(partition):
+    if len(n) != sum(int_partition):
         raise ValueError("Input vector n must have length 4.")
     if not all(n[i] >= n[i+1] for i in range(3)):
         raise ValueError("Input vector n must be decreasingly ordered: n0 >= n1 >= n2 >= n3.")
@@ -82,9 +82,19 @@ def b_best_CONJ(n, partition):
     #TODO
     b_best = np.array([1.])
 
-    #if partition == [1]:
+    #if int_partition == [1]:
     #    return
     #else:
-    raise ValueError("Sorry, for the partition you chose the function has not been implemented yet!")
+    raise ValueError("Sorry, for the integer partition you chose the function has not been implemented yet!")
 
     return b_best
+
+def check_conjecture(n, int_partition, b_best_num, tolerance):
+    """"
+    Checks whether norm(b_best_num - b_best_conj(n, int_partition)) is below tolerance. Returns boolean.
+
+    """
+    if np.linalg.norm(b_best_conj(n, int_partition) - np.array(b_best_num)) < tolerance:
+        return True
+    else:
+        return False

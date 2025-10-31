@@ -119,15 +119,15 @@ def majorizes(x, y, eps=1e-14):
             return False
     return True
     
-def multi_block_spec(M, partition, order=False):
+def multi_block_spec(M, int_partition, order=False):
     """
-    Returns block spectrum of  eigenvalues of M. lamb is the partition parameter. 
+    Returns block spectrum of  eigenvalues of M. lamb is the integer partition. 
     
     Parameters:
     -----------
     M : torch.Tensor (complex)
         Square matrix of size d
-    partition : list (integer)
+    int_partition : list (integer)
         Integer partition of d
     order : boolean
         If True, block spectra will be ordered decreasingly (for each block).
@@ -136,18 +136,18 @@ def multi_block_spec(M, partition, order=False):
     --------
     b : torch.Tensor (complex)
         Block spectrum.
-        [b[0], ..., b[partition[0] - 1]] is the (un)ordered spectrum of upper-left partition[0] x partition[0] block of M
-        [b[partition[0]], ..., b[partition[0] + partition[1] - 1]] is the (un)ordered spectrum of second block, and so on
+        [b[0], ..., b[int_partition[0] - 1]] is the (un)ordered spectrum of upper-left int_partition[0] x int_partition[0] block of M
+        [b[int_partition[0]], ..., b[int_partition[0] + int_partition[1] - 1]] is the (un)ordered spectrum of second block, and so on
     """
     d = M.shape[0]
-    partition_length = len(partition)
-    if not (d == sum(partition)) and all(partition[i] >= partition[i+1] for i in range(partition_length - 1)):
-        print(f"Warning: multi_block_spec called with partition={partition}, which is not a valid decreasingly ordered partition of d={d}")
+    int_partition_length = len(int_partition)
+    if not (d == sum(int_partition)) and all(int_partition[i] >= int_partition[i+1] for i in range(int_partition_length - 1)):
+        print(f"Warning: multi_block_spec called with int_partition={int_partition}, which is not a valid decreasingly ordered integer partition of d={d}")
         return np.nan  # Return NaN for invalid inputs
     blocks = []
     lower_cut = 0
-    for i in range(partition_length):
-        upper_cut = lower_cut + partition[i]
+    for i in range(int_partition_length):
+        upper_cut = lower_cut + int_partition[i]
         blocks.append(M[lower_cut:upper_cut, lower_cut:upper_cut])
         lower_cut = upper_cut
     if order:
@@ -156,12 +156,12 @@ def multi_block_spec(M, partition, order=False):
         b = torch.cat([torch.linalg.eigvals(B) for B in blocks])
     return b
 
-def list_all_partitions(d):
+def list_all_integer_partitions(d):
     """
-    Returns a list of sublists. The sublists are the partitions of the integer d.
+    Returns a list of sublists. The sublists are the integer partitions (Youg diagrams) of the integer d. The trivial integer partition [d] is omitted.
     """
 
-    # Generate all partitions
+    # Generate all integer partitions
     all_partitions = list(partitions(d))
 
     # Convert to list format
@@ -173,3 +173,8 @@ def list_all_partitions(d):
         list_partitions.append(partition)
 
     return list_partitions[1:] # remove trivial partition
+
+def list_all_set_partitions(d):
+    """
+    Returns a list of sublists of subsublists. The sublists are the set partitions of the set {1,...,d} and are composed of
+    """

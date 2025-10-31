@@ -1,0 +1,27 @@
+#TODO
+
+- implement avg(P, n), linear in n. the list of sublists P should be a partition of the set {1,...,d = len(n)}.
+
+- implement function find_conjecture(n, b_best_num): it should
+    . define min_norm_of_diff = float('inf')
+    . best_P = []
+    . order n decreasingly 
+    . build all partitions of [1,...,d], all_partitions = more_itertools.set_partitions([1, ..., d])
+    . for P in all_partitions:
+        norm_of_diff = norm(b_best_num - avg(P, n))
+        if norm_of_diff < min_norm_of_diff:
+            min_norm_of_diff = norm_of_diff
+            best_P = P
+    . return min_norm_of_diff, best_P
+
+- implement get_conjecture.py. Command to run this file should be sth like:
+    python path/to/get_conjecture.py --int_partition [2,1,1] --N_n 100 --N_init 5 --N_steps 1001 --learning_rate 0.01
+    This script will sample N_n n vectors. For each one, b_best_num is obtained numerically. Then find_conjecture function is called. You keep track of WHAT optimal conjectures ever appear, and also of how frequently. May need to implement convergence checks.
+
+- implement check_conjecture.py. Command to run this file should be sth like:
+    python path/to/check_conjecture.py --int_partition [2,1,1] --N_n 100 --N_init 5 --N_steps 1001 --learning_rate 0.01
+    In this script you'll sample many n vectors, get b_best_num, and call check_conjecture function from ana_and_conj_bbset.py.
+
+- (sampling A) for a given integer partition, sample using get_conjecture.py, read off conjectures, and update accordingly b_best_conjecture function in ana_and_conj_bbset.py
+
+- (sampling B) for the same given integer partition, sample a lot of n's using check_conjecture.py 

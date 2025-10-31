@@ -192,15 +192,15 @@ def get_b_best(n, lamb, rand_range=1., N_init=1, N_steps=1000, learning_rate=0.0
     return U_best_best, b_best_best, H_best_best, conjecture_holds
     
 
-def multi_build_cost_function(n, partition):
+def multi_build_cost_function(n, int_partition):
     """
-    Creates the cost function to be minimized via gradient descent, for the given n and the given partition
+    Creates the cost function to be minimized via gradient descent, for the given n and the given integer partition
     
     Parameters:
     -----------
     n : list (float)
         Enters cost function as a parameter.
-    partition : list (int)
+    int_partition : list (int)
         List of non-increasing integers. Must add up to len(n).
         
     Returns:
@@ -213,8 +213,9 @@ def multi_build_cost_function(n, partition):
     """
     d = len(n)
     D = torch.diag(torch.tensor(n, dtype=torch.cdouble))
-    if not (d == sum(partition)) and all(partition[i] >= partition[i+1] for i in range(partition_length - 1)):
-        print(f"Warning: multi_block_spec called with partition={partition}, which is not a valid decreasingly ordered partition of d={d}")
+    int_partition_length = len(int_partition)
+    if not (d == sum(int_partition)) and all(int_partition[i] >= int_partition[i+1] for i in range(int_partition_length - 1)):
+        print(f"Warning: multi_block_spec called with int_partition={int_partition}, which is not a valid decreasingly ordered integer partition of d={d}")
         return np.nan  # Return NaN for invalid inputs
     eps = 1e-15/2
     # check all entries of n are >  - eps and <= 1 + eps, and return nan if fail
@@ -229,12 +230,12 @@ def multi_build_cost_function(n, partition):
             return np.nan
         A = M_to_A(M) # get antihermitian matrix corresponding to M
         U = torch.matrix_exp(A) # get unitary 
-        b = multi_block_spec(U @ D @ U.adjoint(), partition)
+        b = multi_block_spec(U @ D @ U.adjoint(), int_partition)
         return -H(torch.real(b))
     return cost_function
 
 
-def multi_get_b_best(n, partition, rand_range=1., N_init=1, N_steps=1000, learning_rate=0.01, verbosity=1):
+def multi_get_b_best(n, int_partition, rand_range=1., N_init=1, N_steps=1000, learning_rate=0.01, verbosity=1):
     """
     Returns
     
@@ -242,8 +243,8 @@ def multi_get_b_best(n, partition, rand_range=1., N_init=1, N_steps=1000, learni
     -----------
     n : list (float)
         The main parameter/spectrum.
-    partition : list(int)
-        The partition parameter.
+    int_partition : list(int)
+        The integer partition.
     rand_range: float, optional
         Parameter for scaling initialization tensor.
     N_init: int, optional
@@ -267,7 +268,7 @@ def multi_get_b_best(n, partition, rand_range=1., N_init=1, N_steps=1000, learni
     d = len(n)
 
     # build cost function
-    cost_function = multi_build_cost_function(n, partition)
+    cost_function = multi_build_cost_function(n, int_partition)
 
     # useful variables
     U_best = torch.empty(d, d, dtype=torch.cdouble)
@@ -283,12 +284,12 @@ def multi_get_b_best(n, partition, rand_range=1., N_init=1, N_steps=1000, learni
         print(f"\n{'='*40}\nStarting get_b_best optimization for n = {n}\n{'='*40}")
         print(f"Parameters recap:")
         print(f"  n = {n}")
-        print(f"  partition = {partition}")
+        print(f"  int_partition = {int_partition}")
         print(f"  rand_range = {rand_range}")
         print(f"  N_init = {N_init}")
         print(f"  N_steps = {N_steps}")
         print(f"  learning_rate = {learning_rate}")
-        print(f"  print_more = {print_more}\n")
+        print(f"  verbosity = {verbosity}\n")
 
     # start cycle for different initializations
     for i in range(N_init):
@@ -312,7 +313,7 @@ def multi_get_b_best(n, partition, rand_range=1., N_init=1, N_steps=1000, learni
 
         # store best unitary, block spec, and H value
         U_best = torch.matrix_exp(M_to_A(M))
-        b_best = multi_block_spec(U_best @ D @ U_best.adjoint(), partition, order=True)
+        b_best = multi_block_spec(U_best @ D @ U_best.adjoint(), int_partition, order=True)
         H_best = H(b_best).detach().numpy()
 
         # print results
@@ -338,3 +339,4 @@ def multi_get_b_best(n, partition, rand_range=1., N_init=1, N_steps=1000, learni
         print(f"\n{'='*40}\nFinished get_b_best optimization for n = {n}\n{'='*40}\n")
 
     return U_best_best, b_best_best, H_best_best
+

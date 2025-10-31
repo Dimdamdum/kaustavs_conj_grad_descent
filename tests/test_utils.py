@@ -14,7 +14,7 @@ import torch
 # Add the src directory to the path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from kaustav_conj.utils import h, H, bK, block_spec, M_to_A, majorizes, multi_block_spec, list_all_partitions
+from kaustav_conj.utils import h, H, bK, block_spec, M_to_A, majorizes, multi_block_spec, list_all_integer_partitions
 
 
 class TestUtils:
@@ -123,10 +123,10 @@ class TestUtils:
         b_new = np.array(multi_block_spec(M, partition, order=True))
         assert np.allclose(np.sort(b_new), np.sort(b_correct), rtol=1e-10)
 
-    def test_list_all_partitions(self):
-        """Test list_all_partitions function."""
+    def test_list_all_integer_partitions(self):
+        """Test list_all_integer_partitions function."""
         d = 4
-        assert list_all_partitions(d) == [[3,1], [2,2], [2,1,1], [1,1,1,1]]
+        assert list_all_integer_partitions(d) == [[3,1], [2,2], [2,1,1], [1,1,1,1]]
         
 
 
