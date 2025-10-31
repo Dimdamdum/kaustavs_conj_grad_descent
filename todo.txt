@@ -1,8 +1,8 @@
 #TODO
 
-- implement avg(P, n), linear in n. the list of sublists P should be a partition of the set {1,...,d = len(n)}.
+OK - implement avg(P, n), linear in n. the list of sublists P should be a partition of the set {1,...,d = len(n)}.
 
-- implement function find_conjecture(n, b_best_num): it should
+OK - implement function find_conjecture(n, b_best_num) in core.py: it should
     . define min_norm_of_diff = float('inf')
     . best_P = []
     . order n decreasingly 
@@ -13,6 +13,8 @@
             min_norm_of_diff = norm_of_diff
             best_P = P
     . return min_norm_of_diff, best_P
+
+- write some tests for find_conjecture in test_core.py
 
 - implement get_conjecture.py. Command to run this file should be sth like:
     python path/to/get_conjecture.py --int_partition [2,1,1] --N_n 100 --N_init 5 --N_steps 1001 --learning_rate 0.01

@@ -6,7 +6,9 @@ This module contains the main implementations for the construction of the target
 
 import numpy as np
 import torch
-from kaustav_conj.utils import H, M_to_A, block_spec, bK, majorizes, multi_block_spec
+from kaustav_conj.utils import H, M_to_A, block_spec, bK, majorizes, multi_block_spec, avg
+from more_itertools import set_partitions
+
 
 def build_cost_function(n, lamb):
     """
@@ -339,4 +341,56 @@ def multi_get_b_best(n, int_partition, rand_range=1., N_init=1, N_steps=1000, le
         print(f"\n{'='*40}\nFinished get_b_best optimization for n = {n}\n{'='*40}\n")
 
     return U_best_best, b_best_best, H_best_best
+
+
+def find_conjecture(n, b_best_num):
+    """
+    Find the set partition of the set {1, ..., d} that minimizes the norm of the difference
+    between b_best_num and avg(P, n)
+
+    Parameters:
+    -----------
+    n : list of float
+        A list of reals of length d, representing the spectrum.
+    b_best_num : numpy.ndarray
+        A numpy array of size d, representing the numerical best block spectrum.
+
+    Returns:
+    --------
+    min_norm_of_diff : float
+        The minimum norm of the difference found.
+    best_P : list of lists
+        The partition of the set {1, ..., d} that minimizes the norm of the difference.
+    """
+
+    # Initialize variables
+    min_norm_of_diff = float('inf')
+    best_P = []
+
+    # Order n and b_best_num in decreasing order
+    n = sorted(n, reverse=True)
+    b_best_num = np.sort(b_best_num)[::-1]
+
+    # Check if n and b_best_num have the same size
+    if len(n) != len(b_best_num):
+        raise ValueError(f"n and b_best_num must have the same size. Got len(n)={len(n)} and len(b_best_num)={len(b_best_num)}")
+
+    # Build all partitions of the set {1, ..., d}
+    d = len(n)
+    all_partitions = set_partitions(range(1, d + 1)) # from more_itertools library
+
+    # Iterate over all partitions
+    for P in all_partitions:
+        # Compute the vector built with averages of n entries relative to the partition P
+        averaged_n = np.sort(avg(P, n))[::-1]
+
+        # Compute the norm of the difference
+        norm_of_diff = np.linalg.norm(b_best_num - averaged_n)
+
+        # Update the minimum norm and best partition if necessary
+        if norm_of_diff < min_norm_of_diff:
+            min_norm_of_diff = norm_of_diff
+            best_P = P
+
+    return min_norm_of_diff, best_P
 

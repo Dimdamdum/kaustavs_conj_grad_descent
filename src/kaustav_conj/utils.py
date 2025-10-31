@@ -174,7 +174,76 @@ def list_all_integer_partitions(d):
 
     return list_partitions[1:] # remove trivial partition
 
-def list_all_set_partitions(d):
+import numpy as np
+
+def avg(set_partition, n):
     """
-    Returns a list of sublists of subsublists. The sublists are the set partitions of the set {1,...,d} and are composed of
+    Compute a vector obtained by mixing/averaging the components of n according to the set partition P of the set {1,...,len(n)}.
+
+    Parameters
+    ----------
+    set_partition : list of lists of int
+        Ordered set partition of {1, ..., d}, e.g. [[1,2,4], [3]]
+    n : list
+        d-dimensional vector of real numbers
+
+    Returns
+    -------
+    np.ndarray
+        Vector in R^d whose components are blockwise averages of n.
     """
+    n = np.asarray(n, dtype=float)
+    d = len(n)
+    out = np.zeros(d, dtype=float)
+
+    # Validate that set_partition unrolled is a permutation of 1..d
+    flat_partition = [item for sublist in set_partition for item in sublist]
+    if sorted(flat_partition) != list(range(1, d + 1)):
+        raise ValueError(f"avg: partition P must be a permutation of 1..{d}; unrolled P = {sorted(flat)}")
+
+    for block in set_partition:
+        idx = [i - 1 for i in block]   # Convert from 1-based to 0-based indexing
+        avg_val = np.mean(n[idx])
+        out[idx] = avg_val
+
+    return out
+
+def inter_block_sort(int_partition, b):
+    """
+    Sorts the blocks of the array b as indicated by int_partition in decreasing order.
+
+    Parameters:
+    -----------
+    int_partition : list of int
+        A partition of the length d of b, indicating the sizes of the blocks.
+    b : numpy.ndarray
+        A d-dimensional numpy array to be permuted.
+
+    Returns:
+    --------
+    numpy.ndarray
+        A permutation of b such that the blocks of b are sorted in decreasing order.
+
+    Example:
+    --------
+    d = 3
+    int_partition = [2, 1]
+    b = np.array([2., 4., 5.])
+    Output: np.array([4., 2., 5.])
+    """
+    if len(b) != sum(int_partition):
+        raise ValueError(f"inter_block_sort: Length of b ({len(b)}) must equal the sum of int_partition ({sum(int_partition)}).")
+    
+    sorted_b = []
+    start_idx = 0
+
+    for block_size in int_partition:
+        # Extract the block
+        block = b[start_idx:start_idx + block_size]
+        # Sort the block in decreasing order and append to the result
+        sorted_b.extend(sorted(block, reverse=True))
+        # Update the starting index for the next block
+        start_idx += block_size
+
+    return np.array(sorted_b)
+

@@ -14,7 +14,7 @@ import torch
 # Add the src directory to the path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from kaustav_conj.utils import h, H, bK, block_spec, M_to_A, majorizes, multi_block_spec, list_all_integer_partitions
+from kaustav_conj.utils import h, H, bK, block_spec, M_to_A, majorizes, multi_block_spec, list_all_integer_partitions, avg, inter_block_sort
 
 
 class TestUtils:
@@ -127,7 +127,21 @@ class TestUtils:
         """Test list_all_integer_partitions function."""
         d = 4
         assert list_all_integer_partitions(d) == [[3,1], [2,2], [2,1,1], [1,1,1,1]]
-        
+
+    def test_avg(self):
+        """Test list_all_integer_partitions function."""
+        n = [1., 2., 3., 4., 5., 6., 7.]
+        set_partition = [[1,2,4], [3,7], [5,6]]
+        correct_b = np.array([7/3, 7/3, 5., 7/3, 5.5, 5.5 ,5.])
+        assert np.allclose(avg(set_partition, n), correct_b)      
+    
+    def test_inter_block_sort(self):
+        """test inter_block_sort function"""
+        b = np.array([4.,5.,7.,1.,3.,9.,10.])
+        int_partition = [3,2,1,1]
+        b = inter_block_sort(int_partition, b)
+        assert np.allclose(b, np.array([7,5,4,3,1,9,10]))
+
 
 
 
