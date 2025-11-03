@@ -14,16 +14,16 @@ OK - implement function find_conjecture(n, b_best_num) in core.py: it should
             best_P = P
     . return min_norm_of_diff, best_P
 
-- write some tests for find_conjecture in test_core.py
+OK - write some tests for find_conjecture in test_core.py
 
-- implement get_conjecture.py. Command to run this file should be sth like:
-    python path/to/get_conjecture.py --int_partition [2,1,1] --N_n 100 --N_init 5 --N_steps 1001 --learning_rate 0.01
+OK - implement get_conjecture.py. Command to run this file should be sth like:
+    python python_sampling_scripts/get_conjecture.py --int_partition '2,1,1' --N_n 100 --N_init 5 --N_steps 1001 --learning_rate 0.01 --eps 1e-7
     This script will sample N_n n vectors. For each one, b_best_num is obtained numerically. Then find_conjecture function is called. You keep track of WHAT optimal conjectures ever appear, and also of how frequently. May need to implement convergence checks.
+
+- (sampling A) for a given integer partition, sample using get_conjecture.py, read off conjectures, and update accordingly b_best_conjecture function in ana_and_conj_bbset.py
 
 - implement check_conjecture.py. Command to run this file should be sth like:
     python path/to/check_conjecture.py --int_partition [2,1,1] --N_n 100 --N_init 5 --N_steps 1001 --learning_rate 0.01
     In this script you'll sample many n vectors, get b_best_num, and call check_conjecture function from ana_and_conj_bbset.py.
-
-- (sampling A) for a given integer partition, sample using get_conjecture.py, read off conjectures, and update accordingly b_best_conjecture function in ana_and_conj_bbset.py
 
 - (sampling B) for the same given integer partition, sample a lot of n's using check_conjecture.py 

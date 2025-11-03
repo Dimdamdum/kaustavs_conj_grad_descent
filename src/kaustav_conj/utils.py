@@ -178,12 +178,12 @@ import numpy as np
 
 def avg(set_partition, n):
     """
-    Compute a vector obtained by mixing/averaging the components of n according to the set partition P of the set {1,...,len(n)}.
+    Compute a vector obtained by mixing/averaging the components of n according to the set partition P of the set {0,...,len(n) - 1}.
 
     Parameters
     ----------
     set_partition : list of lists of int
-        Ordered set partition of {1, ..., d}, e.g. [[1,2,4], [3]]
+        Ordered set partition of {0, ..., d-1}, e.g. [[0,1,3], [2]]
     n : list
         d-dimensional vector of real numbers
 
@@ -196,15 +196,14 @@ def avg(set_partition, n):
     d = len(n)
     out = np.zeros(d, dtype=float)
 
-    # Validate that set_partition unrolled is a permutation of 1..d
+    # Validate that set_partition unrolled is a permutation of 0..d-1
     flat_partition = [item for sublist in set_partition for item in sublist]
-    if sorted(flat_partition) != list(range(1, d + 1)):
-        raise ValueError(f"avg: partition P must be a permutation of 1..{d}; unrolled P = {sorted(flat)}")
+    if sorted(flat_partition) != list(range(d)):
+        raise ValueError(f"avg: partition P must be a permutation of 0..{d-1}; unrolled P = {sorted(flat_partition)}")
 
     for block in set_partition:
-        idx = [i - 1 for i in block]   # Convert from 1-based to 0-based indexing
-        avg_val = np.mean(n[idx])
-        out[idx] = avg_val
+        avg_val = np.mean(n[block])
+        out[block] = avg_val
 
     return out
 

@@ -131,7 +131,7 @@ class TestUtils:
     def test_avg(self):
         """Test list_all_integer_partitions function."""
         n = [1., 2., 3., 4., 5., 6., 7.]
-        set_partition = [[1,2,4], [3,7], [5,6]]
+        set_partition = [[0,1,3], [2,6], [4,5]]
         correct_b = np.array([7/3, 7/3, 5., 7/3, 5.5, 5.5 ,5.])
         assert np.allclose(avg(set_partition, n), correct_b)      
     

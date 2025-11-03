@@ -11,8 +11,8 @@ import torch
 # Add the src directory to the path so we can import the module
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from kaustav_conj.utils import h, H, M_to_A, bK
-from kaustav_conj.core import build_cost_function, get_b_best, multi_build_cost_function, multi_get_b_best
+from kaustav_conj.utils import h, H, M_to_A, bK, avg
+from kaustav_conj.core import build_cost_function, get_b_best, multi_build_cost_function, multi_get_b_best, find_conjecture
 
 class TestCore:
     """Test core functions."""
@@ -54,5 +54,22 @@ class TestCore:
         b_best_true = np.array([.4, .3, .4, .4])
         eps = 1e-14
         U_best, b_best_num, H_best = multi_get_b_best(n, partition, N_init=4, N_steps=300,learning_rate=0.01)
-        b_best_num = b_best_num.detach().numpy()
         assert np.allclose(b_best_true, b_best_num, rtol=1e-3)
+
+    def test_find_conjecture(self):
+        """Test find_conjecture function for cases where we know the correct conjecture"""
+        n = [0.9, 0.8912, 0.8113, 0.1] # average of n_i's is between lowest two components
+        int_partition = [2,1,1]
+        best_set_partition = [[2], [0,1,3]]
+        U_best, b_best_num, H_best = multi_get_b_best(n, int_partition, N_init=1, N_steps=400,learning_rate=0.01, verbosity=0)
+        assert find_conjecture(n, b_best_num)[1] == best_set_partition
+
+        n = [0.8477, 0.7285, 0.66, 0.332, 0.142]
+        int_partition = [3,1,1]
+        U_best, b_best_num, H_best = multi_get_b_best(n, int_partition, N_init=1, N_steps=400,learning_rate=0.01, verbosity=0)
+        set_partition = find_conjecture(n, b_best_num)[1]
+        bbest_from_set_partition = avg(set_partition, n)
+        b_best_num.sort()
+        bbest_from_set_partition.sort()
+        assert np.allclose(b_best_num, bbest_from_set_partition, rtol=1e-3)
+        

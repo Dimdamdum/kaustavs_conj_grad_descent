@@ -1,4 +1,14 @@
+Command for launching check_kaustav_conj.py:
+
 python path/to/check_kaustav_conj.py --d 3 --N_n 5 --N_init 5 --N_steps 1001 --learning_rate 0.01 --eps 1.e-12 --print_more True
 
 To print less, completely remove last flag
 For meaning of variables, see check_kaustav_conj.py
+
+-------------------------------------------------
+
+Command for launching get_conjecture.py:
+
+python path/to/get_conjecture.py --int_partition '2,1,1' --N_n 5 --N_init 5 --N_steps 300 --learning_rate 0.01 --eps 1.e-6
+
+-------------------------------------------------

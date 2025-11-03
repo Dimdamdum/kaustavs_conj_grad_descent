@@ -26,19 +26,19 @@ def b_best_ana(n, int_partition):
     ############
 
     if int_partition == [3,1]:
-        best_set_partition = [[1,4], [2],[3]]
+        best_set_partition = [[0,3], [1],[2]]
     elif int_partition == [2,2]:
-        best_set_partition = [[1,4], [2,3]]
+        best_set_partition = [[0,3], [1,2]]
     elif int_partition == [2,1,1]:
         eta = sum(n)/4
         if eta >= n[1]: # 1st regime
-            best_set_partition = [[1,3,4],[2]]
+            best_set_partition = [[0,2,3],[1]]
         elif eta >= n[2]: # 2nd regime
-            best_set_partition = [[1,2,3,4]]
+            best_set_partition = [[0,1,2,3]]
         else: # 3rd regime
-            best_set_partition = [[1,2,4],[3]]
+            best_set_partition = [[0,1,3],[2]]
     elif int_partition == [1,1,1,1]:
-        best_set_partition = [[1,2,3,4]]
+        best_set_partition = [[0,1,2,3]]
 
     ############
     ##  d = 5 ##
@@ -47,11 +47,11 @@ def b_best_ana(n, int_partition):
     elif int_partition == [3,1,1]:
         eta = (sum(n) - n[2])/4
         if eta >= n[1]: # 1st regime
-            best_set_partition = [[1,4,5],[2],[3]]
+            best_set_partition = [[0,3,4],[1],[2]]
         elif eta >= n[3]: # 2nd regime
-            best_set_partition = [[1,2,4,5],[3]]
+            best_set_partition = [[0,1,3,4],[2]]
         else: # 3rd regime
-            best_set_partition = [[1,2,5],[3],[4]] # !!! we can't keep the average of n[0],n[1],n[4] in positions 0,1,4 of b_best! We need one more permutation here.
+            best_set_partition = [[0,1,4],[2],[3]] # !!! we can't keep the average of n[0],n[1],n[4] in positions 0,1,4 of b_best! We need one more permutation here.
             b_best = avg(best_set_partition, n)
             b_best[1], b_best[3] = b_best[3], b_best[1]
             already_averaged = True

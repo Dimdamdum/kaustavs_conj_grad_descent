@@ -340,12 +340,12 @@ def multi_get_b_best(n, int_partition, rand_range=1., N_init=1, N_steps=1000, le
         print(f"Numerical b_best = {b_best_best}")
         print(f"\n{'='*40}\nFinished get_b_best optimization for n = {n}\n{'='*40}\n")
 
-    return U_best_best, b_best_best, H_best_best
+    return U_best_best, b_best_best.detach().numpy(), H_best_best
 
 
 def find_conjecture(n, b_best_num):
     """
-    Find the set partition of the set {1, ..., d} that minimizes the norm of the difference
+    Find the set partition of the set {0, ..., d-1} that minimizes the norm of the difference
     between b_best_num and avg(P, n)
 
     Parameters:
@@ -357,10 +357,10 @@ def find_conjecture(n, b_best_num):
 
     Returns:
     --------
-    min_norm_of_diff : float
-        The minimum norm of the difference found.
+    rel_err : float
+        The minimum norm of the difference found, divided by ||n||
     best_P : list of lists
-        The partition of the set {1, ..., d} that minimizes the norm of the difference.
+        The partition of the set {0, ..., d-1} that minimizes the norm of the difference.
     """
 
     # Initialize variables
@@ -375,9 +375,9 @@ def find_conjecture(n, b_best_num):
     if len(n) != len(b_best_num):
         raise ValueError(f"n and b_best_num must have the same size. Got len(n)={len(n)} and len(b_best_num)={len(b_best_num)}")
 
-    # Build all partitions of the set {1, ..., d}
+    # Build all partitions of the set {0, ..., d-1}
     d = len(n)
-    all_partitions = set_partitions(range(1, d + 1)) # from more_itertools library
+    all_partitions = set_partitions(range(d)) # from more_itertools library
 
     # Iterate over all partitions
     for P in all_partitions:
@@ -392,5 +392,7 @@ def find_conjecture(n, b_best_num):
             min_norm_of_diff = norm_of_diff
             best_P = P
 
-    return min_norm_of_diff, best_P
+    rel_err = min_norm_of_diff/np.linalg.norm(n)
+
+    return rel_err, best_P
 
