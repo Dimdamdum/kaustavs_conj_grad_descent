@@ -80,8 +80,10 @@ for _ in range(N_n):
     if(rel_err > highest_rel_error):
         highest_rel_error = rel_err
 
-print(f"Set partitions of {{1,...,{d}}} that occurred as best partitions, with counts:")
+print(f"Set partitions of {{0,...,{d-1}}} that occurred as best partitions, with counts:")
 for key, value in best_P_counter.items():
+    if len(key) == 1:
+        key = f'({key[0]})' # to remove comma at the end of python 1-tuples
     print(f"{key}: {value}")
 
 print(f"\nNumber of sampled n vectors discarded because eps check failed: {count_discarded_n} out of {N_n}")

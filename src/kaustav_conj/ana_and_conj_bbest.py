@@ -7,7 +7,7 @@ from kaustav_conj.utils import avg, inter_block_sort
 
 def b_best_ana(n, int_partition):
     """"
-    Returns the analytically obtained b_best relative to the d-dimensional vector n and the given integer partition. The key underlying idea is a function mapping int_partition of d to a set_partition of {1, ..., d}, possibly depending on the input n ("regimes").
+    Returns the analytically obtained b_best relative to the d-dimensional vector n and the given integer partition. The underlying key idea is a function mapping int_partition of d to a set_partition of {1, ..., d}, possibly depending on the input n ("regimes").
 
     Integer partitions supported so far:
     d=4 [3,1], [2,2], [2,1,1], [1,1,1,1]
@@ -15,14 +15,14 @@ def b_best_ana(n, int_partition):
     """
     # quick validation
     if len(n) != sum(int_partition):
-        raise ValueError("Input vector n must have length 4.")
-    if not all(n[i] >= n[i+1] for i in range(3)):
-        raise ValueError("Input vector n must be decreasingly ordered: n0 >= n1 >= n2 >= n3.")
+        raise ValueError("Condition len(n) = sum(int_partition) not satisfied.")
+    if not all(n[i] >= n[i+1] for i in range(len(n) - 1)):
+        raise ValueError("Input vector n must be decreasingly ordered.")
     
     already_averaged = False # for some cases, we'll need some permutation of the entries of b_best. In those cases, we'll apply avg directly rather than at the end of the function.
 
     ############
-    ##  d = 4 ##
+    ##  d = 4 ##   # useful for code validation
     ############
 
     if int_partition == [3,1]:
@@ -41,7 +41,7 @@ def b_best_ana(n, int_partition):
         best_set_partition = [[0,1,2,3]]
 
     ############
-    ##  d = 5 ##
+    ##  d = 5 ##   # useful for code validation
     ############
 
     elif int_partition == [3,1,1]:
@@ -68,24 +68,53 @@ def b_best_ana(n, int_partition):
 
 def b_best_conj(n, int_partition):
     """"
-    Returns the analytically obtained b_best relative to the d-dimensional vector n and the given integer partition.
+    Returns the conjectured b_best relative to the d-dimensional vector n and the given integer partition.
 
     Partitions supported so far:
 
     """
+
     # quick validation
     if len(n) != sum(int_partition):
-        raise ValueError("Input vector n must have length 4.")
-    if not all(n[i] >= n[i+1] for i in range(3)):
-        raise ValueError("Input vector n must be decreasingly ordered: n0 >= n1 >= n2 >= n3.")
+        raise ValueError("Condition len(n) = sum(int_partition) not satisfied.")
+    if not all(n[i] >= n[i+1] for i in range(len(n) - 1)):
+        raise ValueError("Input vector n must be decreasingly ordered.")
     
-    #TODO
-    b_best = np.array([1.])
+    ############
+    ##  d = 6 ##
+    ############
 
-    #if int_partition == [1]:
-    #    return
-    #else:
-    raise ValueError("Sorry, for the integer partition you chose the function has not been implemented yet!")
+    if int_partition == [4,1,1]:
+        #TODO
+        a = 1
+    elif int_partition == [3,2,1]:
+        #TODO
+        a = 1
+    elif int_partition == [3,1,1,1]:
+        #TODO
+        a = 1
+    elif int_partition == [2,2,2]:
+        #TODO
+        a = 1
+    elif int_partition == [2,2,1,1]:
+        #TODO
+        a = 1
+    elif int_partition == [2,1,1,1,1]:
+        #TODO
+        a = 1
+
+    ############
+    ##  d = 7 ##
+    ############
+
+    elif int_partition == [5,1,1]:
+        #TODO
+        a = 1
+
+    #TODO
+
+    else:
+        raise ValueError("Sorry, for the integer partition you chose the function has not been implemented yet!")
 
     return b_best
 
