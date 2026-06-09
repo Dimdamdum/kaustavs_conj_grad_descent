@@ -1,6 +1,8 @@
 """
 Functions for bbest vectors
 This module contains two functions: b_best_ana returning analytical values of bbest, and b_best_conj returning conjectured values of bbest. Their implementation goes on as we find out more and more formulas for bbest (either analytically or as conjectures, based on numerical sampling).
+
+In the end, for the sampling we took another approach, so that this file was not needed, hence the many #TODOs. Keeping it here as a placeholder and for possible later usage.
 """
 import numpy as np
 from kaustav_conj.utils import avg, inter_block_sort

@@ -12,3 +12,7 @@ Command for launching get_conjecture.py:
 python path/to/get_conjecture.py --int_partition '2,1,1' --N_n 5 --N_init 5 --N_steps 300 --learning_rate 0.01 --eps 1.e-6
 
 -------------------------------------------------
+
+Command for launching check_conjecture.py:
+
+python path/to/check_conjecture.py --int_partition '2,1,1' --N_n 10 --N_init 5 --N_steps 101 --learning_rate 0.01
