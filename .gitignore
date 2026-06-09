@@ -8,6 +8,7 @@ __pycache__/
 # Python virtual environments
 venv/
 env/
+todo.txt
 
 # macOS system files
 .DS_Store
